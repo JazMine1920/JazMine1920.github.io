@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apelar Baneo</title>
+  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="animaciones.css" />
+</head>
+<body>
+  <!-- Barra de navegación -->
+  <div class="navbar">
+    <a href="postulacion.html">Postular</a>
+    <a href="apelar.html">Apelar baneo</a>
+  </div>
+
+  <div class="intro animate-fade-in">Cuéntanos más sobre tu apelación...</div>
+
+  <div class="container animate-slide-up">
+    <div class="profile animate-zoom-in">
+      <div class="profile-pic">
+        <img id="avatar" src="default.png" alt="Foto de perfil" />
+      </div>
+      <div class="profile-name" id="username">Usuario</div>
+    </div>
+
+    <form class="formulario animate-fade-in" id="formulario">
+      <input type="text" id="edad" placeholder="Edad" required />
+      <textarea id="razon_ban" placeholder="¿Por qué fuiste baneado?" required></textarea>
+      <textarea id="apelacion" placeholder="¿Por qué deberíamos quitarte el baneo?" required></textarea>
+      <button type="submit">Enviar Apelación</button>
+    </form>
+  </div>
+
+  <img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" />
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("discordUser"));
+    if (user) {
+      const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
+      const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
+      document.getElementById("avatar").src = avatarURL;
+      document.getElementById("username").textContent = user.username;
+    } else {
+      const hash = window.location.hash;
+      if (hash.includes("access_token")) {
+        const params = new URLSearchParams(hash.slice(1));
+        const token = params.get("access_token");
+
+        fetch("https://discord.com/api/users/@me", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(userData => {
+          localStorage.setItem("discordUser", JSON.stringify(userData));
+          location.reload();
+        });
+      } else {
+        window.location.href = "https://discord.com/oauth2/authorize?client_id=1377488695799582811&response_type=token&redirect_uri=http%3A%2F%2F127.0.0.1%3A3000%2Fapelar.html&scope=identify";
+      }
+    }
+
+    document.getElementById("formulario").addEventListener("submit", e => {
+      e.preventDefault();
+
+      const edad = document.getElementById("edad").value;
+      const razonBan = document.getElementById("razon_ban").value;
+      const apelacion = document.getElementById("apelacion").value;
+
+      const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith("a_") ? "gif" : "png"}`;
+
+      fetch("https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          embeds: [
+            {
+              title: "📨 Nueva Apelación de Baneo",
+              color: 0xe67e22,
+              fields: [
+                { name: "👤 Usuario", value: `${user.username}#${user.discriminator} (ID: ${user.id})`, inline: false },
+                { name: "Edad", value: edad || "No respondido", inline: true },
+                { name: "Razón del baneo", value: razonBan || "No respondido", inline: false },
+                { name: "Apelación", value: apelacion || "No respondido", inline: false }
+              ],
+              thumbnail: { url: avatarUrl },
+              footer: { text: `ID del usuario: ${user.id}` },
+              timestamp: new Date().toISOString()
+            }
+          ]
+        })
+      }).then(() => {
+        alert("✅ ¡Apelación enviada correctamente!");
+        location.reload();
+      });
+    });
+  </script>
+</body>
+</html>
