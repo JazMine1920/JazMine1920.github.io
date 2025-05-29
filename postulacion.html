@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -34,81 +34,100 @@
 
   <img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" />
 
- <script>
-  const user = JSON.parse(localStorage.getItem("discordUser"));
-  if (user) {
-    const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
-    const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
-    document.getElementById("avatar").src = avatarURL;
-    document.getElementById("username").textContent = user.username;
-  } else {
-    const hash = window.location.hash;
-    if (hash.includes("access_token")) {
-      const params = new URLSearchParams(hash.slice(1));
-      const token = params.get("access_token");
+  <script>
+    const webhookURL = "https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA";
 
-      fetch("https://discord.com/api/users/@me", {
+    function loadDiscordUser(token) {
+      return fetch("https://discord.com/api/users/@me", {
         headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(res => res.json())
-        .then(userData => {
-          localStorage.setItem("discordUser", JSON.stringify(userData));
-          location.reload();
-        });
-    } else {
-      window.location.href = "https://discord.com/oauth2/authorize?client_id=1377488695799582811&response_type=code&redirect_uri=https%3A%2F%2FJazMine1920.github.io%2Fpostulacion.html&scope=identify";
+      }).then(res => res.json());
     }
-  }
 
-  document.getElementById("next").addEventListener("click", () => {
-    const edad = document.getElementById("edad").value;
-    const pais = document.getElementById("pais").value;
-    const experiencia = document.getElementById("experiencia").value;
+    async function authenticate() {
+      const hash = window.location.hash;
+      if (hash.includes("access_token")) {
+        const params = new URLSearchParams(hash.slice(1));
+        const token = params.get("access_token");
 
-    const formulario = document.getElementById("formulario");
-    formulario.innerHTML = `
-      <textarea id="razon" placeholder="¿Por qué quieres ser parte del staff?" required></textarea>
-      <textarea id="horario" placeholder="¿Qué horario tienes disponible?" required></textarea>
-      <textarea id="historial" placeholder="¿Has sido parte de algún staff antes?" required></textarea>
-      <button type="submit">Enviar</button>
-    `;
+        try {
+          const userData = await loadDiscordUser(token);
+          localStorage.setItem("discordUser", JSON.stringify(userData));
+          history.replaceState(null, "", window.location.pathname); // Limpiar el hash
+          location.reload();
+        } catch (error) {
+          console.error("Error autenticando:", error);
+          localStorage.removeItem("discordUser");
+        }
+      } else {
+        const user = localStorage.getItem("discordUser");
+        if (!user) {
+          const redirect = encodeURIComponent(window.location.href);
+          window.location.href = "https://discord.com/oauth2/authorize?client_id=1377488695799582811&response_type=code&redirect_uri=https%3A%2F%2FJazMine1920.github.io%2Fpostulacion.html&scope=identify";
+    }
+      }
+    }
 
-    formulario.addEventListener("submit", e => {
-      e.preventDefault();
+    // Llamar autenticación
+    authenticate();
 
-      const razon = document.getElementById("razon").value;
-      const horario = document.getElementById("horario").value;
-      const historial = document.getElementById("historial").value;
+    // Si ya está logueado
+    const user = JSON.parse(localStorage.getItem("discordUser"));
+    if (user) {
+      const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
+      const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
+      document.getElementById("avatar").src = avatarURL;
+      document.getElementById("username").textContent = user.username;
+    }
 
-      const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith("a_") ? "gif" : "png"}`;
+    // Cambiar a segunda parte del formulario
+    document.getElementById("next").addEventListener("click", () => {
+      const edad = document.getElementById("edad").value;
+      const pais = document.getElementById("pais").value;
+      const experiencia = document.getElementById("experiencia").value;
 
-      fetch("https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          embeds: [
-            {
-              title: "📥 Nueva Postulación de Staff",
-              color: 0x4f46e5,
-              fields: [
-                { name: "👤 Usuario", value: `${user.username}#${user.discriminator} (ID: ${user.id})`, inline: false },
-                { name: "Edad", value: edad || "No respondido", inline: true },
-                { name: "País", value: pais || "No respondido", inline: true },
-                { name: "Experiencia previa", value: experiencia || "No respondido", inline: false },
-                { name: "Razón para ser staff", value: razon || "No respondido", inline: false },
-                { name: "Horario disponible", value: horario || "No respondido", inline: true },
-                { name: "Historial como staff", value: historial || "No respondido", inline: false }
-              ],
-              thumbnail: { url: avatarUrl },
-              footer: { text: `ID del usuario: ${user.id}` },
-              timestamp: new Date().toISOString()
-            }
-          ]
-        })
-      }).then(() => {
-        alert("✅ ¡Postulación enviada correctamente!");
+      document.getElementById("formulario").innerHTML = `
+        <textarea id="razon" placeholder="¿Por qué quieres ser parte del staff?" required></textarea>
+        <textarea id="horario" placeholder="¿Qué horario tienes disponible?" required></textarea>
+        <textarea id="historial" placeholder="¿Has sido parte de algún staff antes?" required></textarea>
+        <button type="submit">Enviar</button>
+      `;
+
+      document.getElementById("formulario").addEventListener("submit", async e => {
+        e.preventDefault();
+        const razon = document.getElementById("razon").value;
+        const horario = document.getElementById("horario").value;
+        const historial = document.getElementById("historial").value;
+
+        const embed = {
+          title: "📥 Nueva Postulación de Staff",
+          color: 0x4f46e5,
+          fields: [
+            { name: "👤 Usuario", value: `${user.username}#${user.discriminator} (ID: ${user.id})`, inline: false },
+            { name: "Edad", value: edad || "No respondido", inline: true },
+            { name: "País", value: pais || "No respondido", inline: true },
+            { name: "Experiencia previa", value: experiencia || "No respondido", inline: false },
+            { name: "Razón para ser staff", value: razon || "No respondido", inline: false },
+            { name: "Horario disponible", value: horario || "No respondido", inline: true },
+            { name: "Historial como staff", value: historial || "No respondido", inline: false }
+          ],
+          thumbnail: {
+            url: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith("a_") ? "gif" : "png"}`
+          },
+          footer: { text: `ID del usuario: ${user.id}` },
+          timestamp: new Date().toISOString()
+        };
+
+        await fetch(webhookURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ embeds: [embed] })
+        });
+
+        alert("✅ Postulación enviada correctamente.");
         location.reload();
       });
     });
-  });
-</script>
+  </script>
+</body>
+</html>
+  
