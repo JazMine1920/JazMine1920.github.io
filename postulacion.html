@@ -82,7 +82,7 @@
 
       const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith("a_") ? "gif" : "png"}`;
 
-      fetch("https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA", {
+      fetch("https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
