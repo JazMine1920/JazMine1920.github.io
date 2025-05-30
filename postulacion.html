@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="animaciones.css" />
 </head>
 <body>
+  <!-- Barra de navegación -->
   <div class="navbar">
     <a href="postulacion.html">Postular</a>
     <a href="apelar.html">Apelar baneo</a>
@@ -34,32 +35,41 @@
   <img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" />
 
   <script>
-    const user = JSON.parse(localStorage.getItem("discordUser"));
-    if (user) {
+    let user;
+    const hash = window.location.hash;
+    if (localStorage.getItem("discordUser")) {
+      user = JSON.parse(localStorage.getItem("discordUser"));
+      updateUserProfile(user);
+    } else if (hash.includes("access_token")) {
+      const params = new URLSearchParams(hash.slice(1));
+      const token = params.get("access_token");
+
+      fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(userData => {
+        localStorage.setItem("discordUser", JSON.stringify(userData));
+        user = userData;
+        updateUserProfile(user);
+        window.location.hash = ""; // Limpia el hash
+      });
+    } else {
+      window.location.href = "https://discord.com/oauth2/authorize?client_id=1377488695799582811&response_type=code&redirect_uri=https%3A%2F%2Fjazmine1920.github.io%2Fpostulacion&scope=identify";
+    }
+
+    function updateUserProfile(user) {
       const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
       const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
       document.getElementById("avatar").src = avatarURL;
       document.getElementById("username").textContent = user.username;
-    } else {
-      const hash = window.location.hash;
-      if (hash.includes("access_token")) {
-        const params = new URLSearchParams(hash.slice(1));
-        const token = params.get("access_token");
-
-        fetch("https://discord.com/api/users/@me", {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(res => res.json())
-        .then(userData => {
-          localStorage.setItem("discordUser", JSON.stringify(userData));
-          location.reload();
-        });
-      } else {
-        window.location.href = "https://discord.com/oauth2/authorize?client_id=1377488695799582811&response_type=code&redirect_uri=https%3A%2F%2FJazMine1920.github.io%2Fpostulacion.html&scope=identify";
-      }
     }
 
     document.getElementById("next").addEventListener("click", () => {
+      const edad = document.getElementById("edad").value;
+      const pais = document.getElementById("pais").value;
+      const experiencia = document.getElementById("experiencia").value;
+
       document.getElementById("formulario").innerHTML = `
         <textarea id="razon" placeholder="¿Por qué quieres ser parte del staff?" required></textarea>
         <textarea id="horario" placeholder="¿Qué horario tienes disponible?" required></textarea>
@@ -67,14 +77,14 @@
         <button type="submit">Enviar</button>
       `;
 
-      document.querySelector("form").addEventListener("submit", e => {
+      document.querySelector("#formulario").addEventListener("submit", e => {
         e.preventDefault();
-        const edad = document.getElementById("edad")?.value || "";
-        const pais = document.getElementById("pais")?.value || "";
-        const experiencia = document.getElementById("experiencia")?.value || "";
-        const razon = document.getElementById("razon")?.value || "";
-        const horario = document.getElementById("horario")?.value || "";
-        const historial = document.getElementById("historial")?.value || "";
+        const razon = document.getElementById("razon").value;
+        const horario = document.getElementById("horario").value;
+        const historial = document.getElementById("historial").value;
+
+        const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
+        const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
 
         fetch("https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA", {
           method: "POST",
@@ -96,7 +106,7 @@
                   { name: "Historial como staff", value: historial || "No respondido", inline: false }
                 ],
                 thumbnail: {
-                  url: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith("a_") ? "gif" : "png"}`
+                  url: avatarURL
                 },
                 footer: {
                   text: `ID del usuario: ${user.id}`
@@ -105,7 +115,7 @@
               }
             ]
           })
-        }).then(() => alert("Postulación enviada correctamente."));
+        }).then(() => alert("✅ ¡Postulación enviada con éxito!"));
       });
     });
   </script>
