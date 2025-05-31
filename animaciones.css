@@ -1,3 +1,4 @@
+/* Ya existentes (no cambiar) */
 .animate-fade-in {
   animation: fadeIn 1s ease forwards;
 }
@@ -5,6 +6,7 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
 .animate-slide-up {
   animation: slideUp 1s ease forwards;
 }
@@ -18,6 +20,7 @@
     transform: translateY(0);
   }
 }
+
 .animate-zoom-in {
   animation: zoomIn 0.6s ease forwards;
 }
@@ -31,6 +34,7 @@
     opacity: 1;
   }
 }
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -38,4 +42,107 @@
   0% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0); }
+}
+
+/* NUEVAS ANIMACIONES */
+
+/* Aparecer desde la derecha */
+.animate-slide-right {
+  animation: slideRight 1s ease forwards;
+}
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Rotación al aparecer */
+.animate-rotate-in {
+  animation: rotateIn 0.8s ease forwards;
+}
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Desvanecerse hacia arriba */
+.animate-fade-up {
+  animation: fadeUp 1s ease forwards;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulso suave */
+.animate-pulse {
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+.sidebar.closing {
+  right: -300px;
+  transition: right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sidebar.closing {
+  right: -300px;
+  transition: right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Si no tienes estas animaciones, añádelas también */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
