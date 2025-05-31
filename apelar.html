@@ -2,88 +2,227 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Apelar Baneo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apelación de Baneo</title>
+   <style>
+    
+    .hamburger {
+      font-size: 16px;
+      cursor: pointer;
+      background: #f1f1f1;
+      border: none;
+      color: #333;
+      padding: 8px;
+      position: absolute;
+      right: 1rem;
+      top: 0.5rem;
+      width: 40px;
+      height: 40px;
+      display: flex !important; /* Forzar visibilidad */
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 10000; /* Máxima prioridad */
+    }
+    
+    .hamburger:hover {
+      background: #e0e0e0;
+      transform: scale(1.05);
+    }
+    
+    .navbar-links {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      position: relative; /* Necesario para posicionar el botón */
+    }
+  </style>
   <link rel="stylesheet" href="estilos.css" />
   <link rel="stylesheet" href="animaciones.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-  <!-- Barra de navegación -->
-  <div class="navbar">
-    <a href="postulacion.html">Postular</a>
-    <a href="apelar.html">Apelar baneo</a>
+
+<!-- NAVBAR ESTABLE -->
+<div class="navbar">
+  <div class="navbar-links">
+    <a href="https://discord.gg/genshinimpactes" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-discord" style="font-size: 24px; color: #5865F2;"></i>
+    </a>
+    <a href="postulacion.html" id="link-postulacion">Postulaciones</a>
+    <a href="apelar.html" id="link-apelar">Apelaciones</a>
+    <button class="hamburger" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-banner" id="sidebarBanner">
+    <div class="sidebar-avatar"><img id="sidebarAvatar" src="default.png" alt="Avatar" /></div>
+  </div>
+  <div class="sidebar-username" id="sidebarUsername">Usuario</div>
+
+  <div class="sidebar-logout" id="sidebarLogout" style="display:none;">
+    <button onclick="logout()">Cerrar sesión</button>
   </div>
 
-  <div class="intro animate-fade-in">Cuéntanos más sobre tu apelación...</div>
-
-  <div class="container animate-slide-up">
-    <div class="profile animate-zoom-in">
-      <div class="profile-pic">
-        <img id="avatar" src="default.png" alt="Foto de perfil" />
-      </div>
-      <div class="profile-name" id="username">Usuario</div>
-    </div>
-
-    <form class="formulario animate-fade-in" id="formulario">
-      <input type="text" id="edad" placeholder="Edad" required />
-      <textarea id="razon_ban" placeholder="¿Por qué fuiste baneado?" required></textarea>
-      <textarea id="apelacion" placeholder="¿Por qué deberíamos quitarte el baneo?" required></textarea>
-      <button type="submit">Enviar Apelación</button>
-    </form>
+  <div class="sidebar-login" id="sidebarLogin" style="display:none;">
+    <button onclick="loginWithDiscord()">Iniciar sesión con Discord</button>
   </div>
+</div>
 
-  <img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" />
+<!-- CONTENIDO DE APELACIÓN -->
+<div class="container animate-slide-up" id="contenido">
+  <form class="formulario animate-fade-in" id="formulario">
+    <input type="email" id="correo" placeholder="Correo electrónico" required />
+    <textarea id="razon_ban" placeholder="¿Por qué fuiste baneado?" required></textarea>
+    <textarea id="apelacion" placeholder="¿Por qué deberíamos quitarte el baneo?" required></textarea>
+    <button type="submit">Enviar Apelación</button>
+  </form>
+</div>
 
-  <script>
-    const user = JSON.parse(localStorage.getItem("discordUser"));
-    if (user) {
-      const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
-      const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
-      document.getElementById("avatar").src = avatarURL;
-      document.getElementById("username").textContent = user.username;
+<img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" id="decoracion" />
+
+<script>
+  // FUNCIONES ESTABLES QUE NO AFECTAN EL LAYOUT
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    if (sidebar.classList.contains("open")) {
+      closeSidebar();
     } else {
-      const hash = window.location.hash;
-      if (hash.includes("access_token")) {
-        const params = new URLSearchParams(hash.slice(1));
-        const token = params.get("access_token");
+      sidebar.classList.add("open");
+      overlay.classList.add("active");
+    }
+  }
 
-        fetch("https://discord.com/api/users/@me", {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(res => res.json())
-        .then(userData => {
-          localStorage.setItem("discordUser", JSON.stringify(userData));
-          location.reload();
-        });
-      } else {
-        window.location.href = "https://discord.com/oauth2/authorize?client_id=1377488695799582811&response_type=code&redirect_uri=https%3A%2F%2FJazMine1920.github.io%2Fpostulacion.html&scope=identify";
+  function closeSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    sidebar.classList.remove("open");
+    sidebar.classList.add("closing");
+    overlay.classList.remove("active");
+
+    setTimeout(() => {
+      sidebar.classList.remove("closing");
+    }, 300);
+  }
+
+  function logout() {
+    localStorage.removeItem("discordUser");
+    localStorage.removeItem("discordToken");
+    location.reload();
+  }
+
+  function loginWithDiscord() {
+    const clientId = "1377488695799582811";
+    const redirectUri = encodeURIComponent("http://127.0.0.1:3000/apelar.html");
+    const scope = "identify";
+    const responseType = "token";
+    window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=${responseType}&redirect_uri=${redirectUri}&scope=${scope}`;
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeSidebar();
+  });
+
+  async function getDiscordUser(token) {
+    const res = await fetch("https://discord.com/api/users/@me", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  }
+
+  async function handleAuth() {
+    // Mostrar botón de login si no hay usuario
+    if (!localStorage.getItem("discordUser")) {
+      document.getElementById("sidebarLogin").style.display = "block";
+    }
+    
+    const hash = window.location.hash;
+    if (hash.includes("access_token")) {
+      const params = new URLSearchParams(hash.slice(1));
+      const token = params.get("access_token");
+
+      try {
+        const userData = await getDiscordUser(token);
+        localStorage.setItem("discordUser", JSON.stringify(userData));
+        localStorage.setItem("discordToken", token);
+        window.location.hash = "";
+        location.reload();
+      } catch (error) {
+        alert("No se pudo autenticar con Discord.");
+      }
+    } else {
+      const storedUser = localStorage.getItem("discordUser");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const avatarFormat = user.avatar?.startsWith("a_") ? "gif" : "png";
+        const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
+        const bannerURL = user.banner
+          ? `https://cdn.discordapp.com/banners/${user.id}/${user.banner}.${user.banner.startsWith("a_") ? "gif" : "png"}?size=512`
+          : "https://i.pinimg.com/736x/0c/eb/2d/0ceb2d1ba310dbeb1fc7fe9286b165ff.jpg";
+
+        document.getElementById("sidebarAvatar").src = avatarURL;
+        document.getElementById("sidebarUsername").textContent = user.username;
+        document.getElementById("sidebarBanner").style.backgroundImage = `url('${bannerURL}')`;
+        document.getElementById("sidebarLogout").style.display = "block";
+        document.getElementById("sidebarLogin").style.display = "none";
       }
     }
+  }
 
+  // INICIALIZACIÓN ESTABLE
+  window.addEventListener('DOMContentLoaded', () => {
+    handleAuth();
+    
+    // Manejar el envío del formulario de apelación
     document.getElementById("formulario").addEventListener("submit", e => {
       e.preventDefault();
 
-      const edad = document.getElementById("edad").value;
+      // Verificar si el usuario está autenticado
+      const storedUser = localStorage.getItem("discordUser");
+      if (!storedUser) {
+        alert("❌ Debes iniciar sesión con Discord antes de enviar una apelación");
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+      const correo = document.getElementById("correo").value;
       const razonBan = document.getElementById("razon_ban").value;
       const apelacion = document.getElementById("apelacion").value;
 
-      const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith("a_") ? "gif" : "png"}`;
+      // Validar campos requeridos
+      if (!correo || !razonBan || !apelacion) {
+        alert("❌ Completa todos los campos antes de enviar la apelación");
+        return;
+      }
 
+      // Obtener avatar del usuario
+      const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
+      const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
+
+      // Enviar apelación al webhook de Discord
       fetch("https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
+          "content": "Ha llegado una nueva apelación de baneo <:Paimonasesina:970216558897025064>",
           embeds: [
             {
-              title: "📨 Nueva Apelación de Baneo",
-              color: 0xe67e22,
+              title: "Nueva apelación de ban",
+              color: 0xed4245,
               fields: [
-                { name: "👤 Usuario", value: `${user.username}#${user.discriminator} (ID: ${user.id})`, inline: false },
-                { name: "Edad", value: edad || "No respondido", inline: true },
-                { name: "Razón del baneo", value: razonBan || "No respondido", inline: false },
-                { name: "Apelación", value: apelacion || "No respondido", inline: false }
+                { name: "👤 Usuario", value: `${user.username} (ID: ${user.id})`, inline: false },
+                { name: "📧 Correo", value: correo || "No proporcionado", inline: true },
+                { name: "🔴 Razón del baneo", value: razonBan || "No especificada", inline: false },
+                { name: "📝 Apelación", value: apelacion || "No especificada", inline: false }
               ],
               thumbnail: { url: avatarUrl },
               footer: { text: `ID del usuario: ${user.id}` },
@@ -92,10 +231,36 @@
           ]
         })
       }).then(() => {
-        alert("✅ ¡Apelación enviada correctamente!");
-        location.reload();
+        // Mostrar mensaje de éxito
+        document.getElementById("formulario").style.display = "none";
+        document.getElementById("decoracion").style.display = "none";
+
+        const mensajeGracias = document.createElement("div");
+        mensajeGracias.style.textAlign = "center";
+        mensajeGracias.style.marginTop = "2rem";
+        mensajeGracias.innerHTML = `
+          <h2>¡Apelación enviada con éxito!</h2>
+          <p>Tu solicitud ha sido recibida y será revisada por nuestro equipo.</p>
+          <img src="https://s3.getstickerpack.com/storage/uploads/sticker-pack/genshin-impact-paimon-1/sticker_13.png?647046bbdaac1ca3728c9de02ad210dc&d=200x200" 
+               alt="Paimon Gracias" 
+               style="margin-top: 1rem; width: 200px; height: 200px;" />
+        `;
+
+        document.getElementById("contenido").appendChild(mensajeGracias);
+      }).catch(error => {
+        alert("❌ Ocurrió un error al enviar tu apelación. Por favor intenta nuevamente.");
+        console.error("Error al enviar apelación:", error);
       });
     });
-  </script>
+
+    // Resaltar enlace activo
+    const path = window.location.pathname.split("/").pop();
+    if (path === "postulacion.html") {
+      document.getElementById("link-postulacion").classList.add("active");
+    } else if (path === "apelar.html") {
+      document.getElementById("link-apelar").classList.add("active");
+    }
+  });
+</script>
 </body>
 </html>
