@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio | Comunidad</title>
+  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="animaciones.css" />
+  <style>
+    .hero {
+      text-align: center;
+      margin: 4rem 0 2rem;
+      color: #4f46e5;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    main {
+      background-color: white;
+      border-radius: 20px;
+    }
+
+    .main-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      margin-bottom: 4rem;
+    }
+
+    .option-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      width: 300px;
+    }
+
+    .option-card h3 {
+      margin-bottom: 0.5rem;
+      color: #4f46e5;
+    }
+
+    .option-card p {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .option-card a {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border: 2px solid #4f46e5;
+      border-radius: 10px;
+      color: #4f46e5;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .option-card a:hover {
+      background-color: #4f46e5;
+      color: white;
+    }
+
+    .hamburger {
+      margin-right: 1.5rem;
+      font-size: 16px;
+      background: #f1f1f1;
+      border: none;
+      color: #333;
+      padding: 8px;
+      position: absolute;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      display: flex !important;
+      /* Forzar visibilidad */
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 10000;
+      /* Máxima prioridad */
+    }
+
+    .hamburger:hover {
+      background: #e0e0e0;
+      transform: scale(1.05);
+    }
+
+    .navbar-links {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      position: relative;
+      /* Necesario para posicionar el botón */
+    }
+
+    .perfil {
+      cursor: pointer;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+  <!-- NAVBAR ESTABLE -->
+  <div class="navbar">
+    <div class="navbar-links">
+      <a href="Index.html">
+        <i class="fas fa-home"></i>
+      </a>
+      <a href="https://discord.gg/genshinimpactes" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-discord" style="font-size: 24px; color: #5865F2;"></i>
+      </a>
+      <a href="postulacion.html" id="link-postulacion">Postulaciones</a>
+      <a href="apelar.html" id="link-apelar">Apelaciones</a>
+      <button class="hamburger" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-banner" id="sidebarBanner">
+      <div class="sidebar-avatar"><img id="sidebarAvatar" src="default.png" alt="Avatar" /></div>
+    </div>
+    <div class="sidebar-username" id="sidebarUsername">Usuario</div>
+
+    <div class="sidebar-logout" id="sidebarLogout" style="display:none;">
+      <button onclick="logout()">Cerrar sesión</button>
+    </div>
+
+    <div class="sidebar-login" id="sidebarLogin" style="display:none;">
+      <button onclick="loginWithDiscord()">Iniciar sesión con Discord</button>
+    </div>
+  </div>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero animate-fade-in">
+      <h1>Bienvenido a Nuestra Comunidad</h1>
+      <p>Explora nuestras opciones y forma parte de nuestro equipo</p>
+    </section>
+
+    <!-- Opciones principales -->
+    <section class="main-options animate-slide-up">
+      <div class="option-card">
+        <h3>Postulación</h3>
+        <p>¿Te interesa unirte al staff? Completa el formulario de postulación.</p>
+        <a href="postulacion.html">Ir a Postulación</a>
+      </div>
+      <div class="option-card">
+        <h3>Apelar Baneo</h3>
+        <p>¿Fuiste baneado? Puedes enviar una apelación.</p>
+        <a href="apelar.html">Apelar Baneo</a>
+      </div>
+      <div class="option-card">
+        <h3>Mi Perfil</h3>
+        <p>Revisa tu información personal y configuración de cuenta.</p>
+        <a class="perfil" onclick="toggleSidebar()">Ver Perfil</a>
+      </div>
+    </section>
+  </main>
+
+  <img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" />
+
+
+  <script src="Scrips.js"></script>
+</body>
+
+</html>
