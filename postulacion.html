@@ -2,122 +2,286 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Postulación Staff</title>
+  <style>
+    
+    .hamburger {
+      font-size: 16px;
+      cursor: pointer;
+      background: #f1f1f1;
+      border: none;
+      color: #333;
+      padding: 8px;
+      position: absolute;
+      right: 1rem;
+      top: 0.5rem;
+      width: 40px;
+      height: 40px;
+      display: flex !important; /* Forzar visibilidad */
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 10000; /* Máxima prioridad */
+    }
+    
+    .hamburger:hover {
+      background: #e0e0e0;
+      transform: scale(1.05);
+    }
+    
+    .navbar-links {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      position: relative; /* Necesario para posicionar el botón */
+    }
+  </style>
   <link rel="stylesheet" href="estilos.css" />
   <link rel="stylesheet" href="animaciones.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-  <!-- Barra de navegación -->
-  <div class="navbar">
-    <a href="postulacion.html">Postular</a>
-    <a href="apelar.html">Apelar baneo</a>
+
+<div class="navbar">
+  <div class="navbar-links">
+    <a href="https://discord.gg/genshinimpactes" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-discord" style="font-size: 24px; color: #5865F2;"></i>
+    </a>
+    <a href="postulacion.html" id="link-postulacion">Postulaciones</a>
+    <a href="apelar.html" id="link-apelar">Apelaciones</a>
+    <!-- Botón hamburguesa corregido (clase cambiada a "hamburger") -->
+    <button class="hamburger" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-banner" id="sidebarBanner">
+    <div class="sidebar-avatar"><img id="sidebarAvatar" src="default.png" alt="Avatar" /></div>
+  </div>
+  <div class="sidebar-username" id="sidebarUsername">Usuario</div>
+
+  <div class="sidebar-logout" id="sidebarLogout" style="display:none;">
+    <button onclick="logout()">Cerrar sesión</button>
   </div>
 
-  <div class="intro animate-fade-in">Cuéntanos más sobre ti...</div>
-
-  <div class="container animate-slide-up">
-    <div class="profile animate-zoom-in">
-      <div class="profile-pic">
-        <img id="avatar" src="default.png" alt="Foto de perfil" />
-      </div>
-      <div class="profile-name" id="username">Usuario</div>
-    </div>
-
-    <form class="formulario animate-fade-in" id="formulario">
-      <input type="text" id="edad" placeholder="Edad" required />
-      <textarea id="pais" placeholder="País" required></textarea>
-      <textarea id="experiencia" placeholder="¿Tienes experiencia previa?" required></textarea>
-      <button type="button" id="next">Siguiente</button>
-    </form>
+  <div class="sidebar-login" id="sidebarLogin" style="display:none;">
+    <button onclick="loginWithDiscord()">Iniciar sesión con Discord</button>
   </div>
+</div>
 
-  <img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" />
+<div class="intro animate-fade-in" id="mensaje-inicial"></div>
 
-  <script>
-    let user;
+<div class="container animate-slide-up" id="contenido">
+  <form class="formulario animate-fade-in" id="formulario">
+    <input type="text" id="edad" placeholder="Edad" required />
+    <textarea id="pais" placeholder="País" required></textarea>
+    <textarea id="experiencia" placeholder="¿Tienes experiencia previa?" required></textarea>
+    <button type="button" id="next">Siguiente</button>
+  </form>
+</div>
+
+<img src="Paimon.gif" alt="Decoración" class="decoracion-img animate-float" id="decoracion" />
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    if (sidebar.classList.contains("open")) {
+      closeSidebar();
+    } else {
+      sidebar.classList.add("open");
+      overlay.classList.add("active");
+    }
+  }
+
+  function closeSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    sidebar.classList.remove("open");
+    sidebar.classList.add("closing");
+    overlay.classList.remove("active");
+
+    setTimeout(() => {
+      sidebar.classList.remove("closing");
+    }, 300);
+  }
+
+  function logout() {
+    localStorage.removeItem("discordUser");
+    localStorage.removeItem("discordToken");
+    location.reload();
+  }
+
+  function loginWithDiscord() {
+    const clientId = "1377488695799582811";
+    const redirectUri = encodeURIComponent("http://127.0.0.1:3000/postulacion.html");
+    const scope = "identify";
+    const responseType = "token";
+    window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=${responseType}&redirect_uri=${redirectUri}&scope=${scope}`;
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeSidebar();
+  });
+
+  async function getDiscordUser(token) {
+    const res = await fetch("https://discord.com/api/users/@me", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  }
+
+  async function handleAuth() {
+    // Mostrar botón de login si no hay usuario
+    if (!localStorage.getItem("discordUser")) {
+      document.getElementById("sidebarLogin").style.display = "block";
+    }
+    
     const hash = window.location.hash;
-    if (localStorage.getItem("discordUser")) {
-      user = JSON.parse(localStorage.getItem("discordUser"));
-      updateUserProfile(user);
-    } else if (hash.includes("access_token")) {
+    if (hash.includes("access_token")) {
       const params = new URLSearchParams(hash.slice(1));
       const token = params.get("access_token");
 
-      fetch("https://discord.com/api/users/@me", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(userData => {
+      try {
+        const userData = await getDiscordUser(token);
         localStorage.setItem("discordUser", JSON.stringify(userData));
-        user = userData;
-        updateUserProfile(user);
-        window.location.hash = ""; // Limpia el hash
-      });
+        localStorage.setItem("discordToken", token);
+        window.location.hash = "";
+        location.reload();
+      } catch (error) {
+        alert("No se pudo autenticar con Discord.");
+      }
     } else {
-      window.location.href = "https://discord.com/oauth2/authorize?client_id=1377488695799582811&response_type=code&redirect_uri=https%3A%2F%2Fjazmine1920.github.io%2Fpostulacion&scope=identify";
-    }
-
-    function updateUserProfile(user) {
-      const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
-      const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
-      document.getElementById("avatar").src = avatarURL;
-      document.getElementById("username").textContent = user.username;
-    }
-
-    document.getElementById("next").addEventListener("click", () => {
-      const edad = document.getElementById("edad").value;
-      const pais = document.getElementById("pais").value;
-      const experiencia = document.getElementById("experiencia").value;
-
-      document.getElementById("formulario").innerHTML = `
-        <textarea id="razon" placeholder="¿Por qué quieres ser parte del staff?" required></textarea>
-        <textarea id="horario" placeholder="¿Qué horario tienes disponible?" required></textarea>
-        <textarea id="historial" placeholder="¿Has sido parte de algún staff antes?" required></textarea>
-        <button type="submit">Enviar</button>
-      `;
-
-      document.querySelector("#formulario").addEventListener("submit", e => {
-        e.preventDefault();
-        const razon = document.getElementById("razon").value;
-        const horario = document.getElementById("horario").value;
-        const historial = document.getElementById("historial").value;
-
-        const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
+      const storedUser = localStorage.getItem("discordUser");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const avatarFormat = user.avatar?.startsWith("a_") ? "gif" : "png";
         const avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
+        const bannerURL = user.banner
+          ? `https://cdn.discordapp.com/banners/${user.id}/${user.banner}.${user.banner.startsWith("a_") ? "gif" : "png"}?size=512`
+          : "https://i.pinimg.com/736x/0c/eb/2d/0ceb2d1ba310dbeb1fc7fe9286b165ff.jpg";
 
-        fetch("https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            embeds: [
-              {
-                title: "📥 Nueva Postulación de Staff",
-                color: 0x4f46e5,
-                fields: [
-                  { name: "👤 Usuario", value: `${user.username}#${user.discriminator} (ID: ${user.id})`, inline: false },
-                  { name: "Edad", value: edad || "No respondido", inline: true },
-                  { name: "País", value: pais || "No respondido", inline: true },
-                  { name: "Experiencia previa", value: experiencia || "No respondido", inline: false },
-                  { name: "Razón para ser staff", value: razon || "No respondido", inline: false },
-                  { name: "Horario disponible", value: horario || "No respondido", inline: true },
-                  { name: "Historial como staff", value: historial || "No respondido", inline: false }
-                ],
-                thumbnail: {
-                  url: avatarURL
-                },
-                footer: {
-                  text: `ID del usuario: ${user.id}`
-                },
-                timestamp: new Date().toISOString()
-              }
-            ]
-          })
-        }).then(() => alert("✅ ¡Postulación enviada con éxito!"));
+        document.getElementById("sidebarAvatar").src = avatarURL;
+        document.getElementById("sidebarUsername").textContent = user.username;
+        document.getElementById("sidebarBanner").style.backgroundImage = `url('${bannerURL}')`;
+        document.getElementById("sidebarLogout").style.display = "block";
+        document.getElementById("sidebarLogin").style.display = "none";
+      }
+    }
+  }
+
+  handleAuth();
+
+  document.getElementById("next").addEventListener("click", () => {
+    const edad = document.getElementById("edad");
+    const pais = document.getElementById("pais");
+    const experiencia = document.getElementById("experiencia");
+
+    let valido = true;
+    [edad, pais, experiencia].forEach(campo => {
+      if (!campo.value.trim()) {
+        campo.classList.add("campo-invalido");
+        valido = false;
+      } else {
+        campo.classList.remove("campo-invalido");
+      }
+    });
+
+    if (!valido) {
+      alert("❌ Completa todos los campos antes de continuar.");
+      return;
+    }
+
+    document.getElementById("formulario").innerHTML = `
+      <textarea id="razon" placeholder="¿Por qué quieres ser parte del staff?" required></textarea>
+      <textarea id="horario" placeholder="¿Qué horario tienes disponible?" required></textarea>
+      <textarea id="historial" placeholder="¿Has sido parte de algún staff antes?" required></textarea>
+      <button type="submit">Enviar</button>
+    `;
+
+    document.getElementById("formulario").addEventListener("submit", async e => {
+      e.preventDefault();
+
+      const razon = document.getElementById("razon");
+      const horario = document.getElementById("horario");
+      const historial = document.getElementById("historial");
+
+      let validoFinal = true;
+      [razon, horario, historial].forEach(campo => {
+        if (!campo.value.trim()) {
+          campo.classList.add("campo-invalido");
+          validoFinal = false;
+        } else {
+          campo.classList.remove("campo-invalido");
+        }
+      });
+
+      if (!validoFinal) {
+        alert("❌ Completa todos los campos antes de enviar.");
+        return;
+      }
+
+      const user = JSON.parse(localStorage.getItem("discordUser"));
+      const avatarFormat = user.avatar.startsWith("a_") ? "gif" : "png";
+      const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
+
+      fetch("https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          content: "📥 Nueva postulación de staff recibida <:Paimon_eh:987801872641445958>️",
+          embeds: [
+            {
+              title: "📋 Postulación Staff",
+              color: 0x57f287,
+              fields: [
+                { name: "👤 Usuario", value: `${user.username}#${user.discriminator} (ID: ${user.id})`, inline: false },
+                { name: "Edad", value: edad.value.trim(), inline: true },
+                { name: "País", value: pais.value.trim(), inline: true },
+                { name: "Experiencia previa", value: experiencia.value.trim(), inline: false },
+                { name: "Motivación", value: razon.value.trim(), inline: false },
+                { name: "Horario disponible", value: horario.value.trim(), inline: true },
+                { name: "Historial como staff", value: historial.value.trim(), inline: false }
+              ],
+              thumbnail: { url: avatarUrl },
+              footer: { text: `ID del usuario: ${user.id}` },
+              timestamp: new Date().toISOString()
+            }
+          ]
+        })
+      }).then(() => {
+        document.getElementById("formulario").style.display = "none";
+        document.getElementById("decoracion").style.display = "none";
+
+        const mensajeGracias = document.createElement("div");
+        mensajeGracias.style.textAlign = "center";
+        mensajeGracias.style.marginTop = "2rem";
+        mensajeGracias.innerHTML = `
+          <h2>¡Gracias por postularte!</h2>
+          <img src="https://s3.getstickerpack.com/storage/uploads/sticker-pack/genshin-impact-paimon-1/sticker_13.png?647046bbdaac1ca3728c9de02ad210dc&d=200x200" 
+               alt="Paimon Gracias" 
+               style="margin-top: 1rem; width: 200px; height: 200px;" />
+        `;
+
+        document.getElementById("contenido").appendChild(mensajeGracias);
       });
     });
-  </script>
+  });
+
+  const path = window.location.pathname.split("/").pop();
+  if (path === "postulacion.html") {
+    document.getElementById("link-postulacion").classList.add("active");
+  } else if (path === "apelar.html") {
+    document.getElementById("link-apelar").classList.add("active");
+  }
+</script>
 </body>
 </html>
