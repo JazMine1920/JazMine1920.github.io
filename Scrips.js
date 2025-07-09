@@ -157,7 +157,7 @@ async function getDiscordUser(token) {
       const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${avatarFormat}`;
 
       // Enviar apelación al webhook de Discord
-      fetch("https://discord.com/api/webhooks/1377521261579604029/RG03fM4EC7gzr8nnognq2QtMvHmBzYsg-vd7sNF0X7ZZotj8fg0eYitD0y_wQiSmVbqA", {
+      fetch("https://discord.com/api/webhooks/1392343229856223445/4rN3E1-Hp5grQT26aZFqTTEUtf_nFp7HjTfy-Lr9njlkyYK3SIfntCR_ZwGChUbAGJC5", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
